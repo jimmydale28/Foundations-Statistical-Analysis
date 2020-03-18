@@ -1,0 +1,129 @@
+---
+title: "Week_1_Lab"
+author: "JamesDale"
+date: "1/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Source import
+source("http://www.openintro.org/stat/data/arbuthnot.R")
+source("http://www.openintro.org/stat/data/present.R")
+```
+
+## Exercise 1
+
+```{r}
+#scater plot number of female batisms over time
+plot(x = arbuthnot$year, y = arbuthnot$girls)
+```
+
+```{r}
+#line plot  number of female batisms over time
+plot(x = arbuthnot$year, y = arbuthnot$girls, type = "l")
+```
+
+```{r echo=FALSE}
+#Help link
+#?plot
+```
+
+## Exercise 2
+```{r}
+#manual calculation
+5218 + 4683
+```
+
+```{r}
+#Adding boys and girls vectors
+arbuthnot$boys + arbuthnot$girls
+```
+
+```{r}
+#Plot showing the total number (boys+girls) of batisms per year
+plot(arbuthnot$year, arbuthnot$boys + arbuthnot$girls, type = "l")
+```
+
+```{r}
+#manual proportion of boys
+5218 / 4683
+```
+
+```{r}
+#Dividing vectors
+arbuthnot$boys / arbuthnot$girls
+```
+
+```{r}
+#Manual proportion of newborns that are boys
+5218 / (5218 + 4683)
+```
+
+```{r}
+#proportion of newborns that are boys
+arbuthnot$boys / (arbuthnot$boys + arbuthnot$girls)
+```
+
+## Exercise 3
+
+```{r}
+#comparison operators
+arbuthnot$boys > arbuthnot$girls
+```
+
+------
+
+# Activities
+
+## Activity 1
+```{r}
+#Years represented in data set
+present$year
+```
+
+```{r}
+#Name of variables
+names(present)
+```
+
+```{r}
+#Dimensions
+dim(present)
+```
+
+## Exercise 2
+### Comparisions:
+
+#### The __difference__ in number of boys baptised in the arbuthnot data set and the present data set is : __`r format(abs(sum(arbuthnot$boys)-sum(present$boys)), scientific=FALSE)`__. The total in the arbuthnot data set is __`r if (sum(arbuthnot$boys) < sum(present$boys)) {"lower"} else { "higher"}`__ than in present.
+
+#### The __difference__ in number of girls baptised in the arbuthnot data set and the present data set is : __`r format(abs(sum(arbuthnot$girls)-sum(present$girlss)), scientific=FALSE)`__. The total in the arbuthnot data set is __`r if (sum(arbuthnot$girls) < sum(present$girls)) {"lower"} else { "higher"}`__ than in present.
+
+#### In the arbuthnot data set there is a greater number of  __`r if(sum(arbuthnot$boys)>sum(arbuthnot$girls)){"boys"}else{"girls"}`__.In the present data set there is a greater number of __`r if(sum(present $boys)>sum(present $girls)){"boys"}else{"girls"}`__
+
+#### The data in the arbuthnot data set is spread over __`r max(arbuthnot$year)-min(arbuthnot$year)`__ years. The data in the present data set is spread over __`r max(present$year) - min(present$year)`__ years.
+
+
+## Exercise 3
+```{r}
+plot(present$year, present$boys, xlab = "Years", ylab = "Number of Newborns", type = "l", col = "Blue", main = "Present")
+par(new = TRUE)
+plot(present$year, present$girls, type="l", xaxt = "n", yaxt = "n", ylab = "", xlab = "", col = "Red")
+legend("topleft", legend=c("Boys", "Girls"),col=c("blue", "red"), lty = 1)
+```
+
+```{r}
+plot(arbuthnot$year, arbuthnot$boys, xlab = "Years", ylab = "Number of Newborns", type = "l", col = "Blue", main = "Arbuthnot")
+par(new = TRUE)
+plot(arbuthnot$year, arbuthnot$girls, type="l", xaxt = "n", yaxt = "n", ylab = "", xlab = "", col = "Red")
+legend("topleft", legend=c("Boys", "Girls"),col=c("blue", "red"), lty = 1)
+```
+
+#### Comparing the two graphs, we can see the ratio between girls and boys were about even in both the arbuthnot data and present data however, the ratio seems to deviate more in the arbuthnot data.
+
+## Exercise 4
+```{r}
+present$births = present$boys + present$girls
+```
+
+#### The year with the highest number of births is __`r present[which.max(present$births),][1]`__
