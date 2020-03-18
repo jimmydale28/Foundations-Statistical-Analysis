@@ -1,0 +1,139 @@
+---
+title: "Week5_Lab"
+author: "JamesDale"
+date: "2/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+download.file("http://www.openintro.org/stat/data/nc.RData", destfile = "nc.RData")
+load("nc.RData")
+```
+
+## Exercise 1
+```{r ex1-1}
+names(nc)
+summary(nc)
+```
+
+## Exercise 2
+
+```{r ex2-1}
+nc$habit_bin <- ifelse(nc$habit == 'smoker', 1, 0)
+nonsmokers <- subset(nc, habit_bin == 0)
+smokers <- subset(nc, habit_bin == 1)
+
+boxplot(nc$weight ~ nc$habit)
+
+smokers_max_x <- max(smokers$weight)
+non_max_x <- max(nonsmokers$weight)
+max_x <- ifelse(smokers_max_x > non_max_x, smokers_max_x, non_max_x)
+
+par(mfrow=c(1,2))
+boxplot(smokers$weight, ylim = c(0, max_x))
+boxplot(nonsmokers$weight, ylim = c(0, max_x))
+
+by(nc$weight, nc$habit, mean)
+```
+
+## Exercise 3
+### Checking conditions
+* Independence: random sample/assignment, 10% condition when sampling without replacement
+* Normality: nearly normal population or n ≥ 30, no extreme skew -- or use the t distribution
+```{r ex3-1}
+hist(nc$weight)
+hist(smokers$weight)
+hist(nonsmokers$weight)
+by(nc$weight, nc$habit, length)
+```
+
+We do see the skew in the total data as well as with each group but given the large sample size we can proceed with the hypothesis test.
+
+## Exercise 4
+### H0: µ smokers weight = µ non smokers weight
+### H0: µ smokers weight != µ non smokers weight
+
+```{r ex4-1}
+inference(y = nc$weight, x = nc$habit, est = "mean", type = "ht", null = 0, 
+          alternative = "twosided", method = "theoretical")
+```
+
+## Excercise 5
+```{r ex5-1}
+inference(y = nc$weight, x = nc$habit, est = "mean", type = "ci", null = 0, 
+          alternative = "twosided", method = "theoretical", 
+          order = c("smoker","nonsmoker"))
+```
+
+## Activity 1
+#### Calculate a 95% confidence interval for the average length of pregnancies (weeks) and interpret it in context. Note that since you’re doing inference on a single population parameter, there is no explanatory variable, so you can omit the x variable from the function
+```{r act1-1}
+inference(y = nc$weeks, est = "mean", type = "ci", 
+           alternative = "twosided", method = "theoretical", conflevel = 0.95)
+```
+We can interpret with 95% confidence the population mean is between __38.1528__ and __38.5165__. This gives a tight range which usually is true of a more percise estimate.
+
+## Activity 2
+#### Calculate a new confidence interval for the same parameter at the 90% confidence level. You can change the confidence level by adding a new argument to the function: conflevel = 0.90
+```{r act2-1}
+inference(y = nc$weeks, est = "mean", type = "ci", 
+           alternative = "twosided", method = "theoretical", conflevel = 0.90)
+```
+We can interpret with 90% confidence the population mean is between __38.3347__ and __38.4873__. This gives a tight range which usually is true of a more percise estimate. This invale is tighter and has the same statard deviation and standard error as the confidence inveral to 95%
+
+## Activity 3
+#### Conduct a hypothesis test evaluating whether the average weight gained by younger mothers is different than the average weight gained by mature mothers.
+### H0 µ younger moms = µ mature moms      
+### HA µ younger mom != µ mature moms
+
+```{r act3-1}
+boxplot(nc$weight ~ nc$mature)
+
+inference(y = nc$weight, x = nc$mature, est = "mean", type = "ci", null = 0, 
+          alternative = "twosided", method = "theoretical", order = c('younger mom', 'mature mom'))
+
+inference(y = nc$weight, x = nc$mature, est = "mean", type = "ht", null = 0, 
+          alternative = "twosided", method = "theoretical", order = c('younger mom', 'mature mom'))
+```
+
+Based on the hypothesis test we fail to reject the null hypothesis. This means the average weight for younger mothers is not statistically different than the average weight for mature mothers. 
+
+## Activity 4
+#### Now, a non-inference task: Determine the age cutoff for younger and mature mothers. Use a method of your choice, and explain how your method works
+```{r act4-1}
+young <- subset(nc, nc$mature == 'younger mom')
+mature <- subset(nc, nc$mature == 'mature mom')
+max_young <- max(young$mage)
+min_mature <- min(mature$mage)
+```
+
+#### The cutoff age for young mothers is __`r {max_young}`__. If a mothers age is __`r {min_mature}`__ they will be classfied as mature. I found this by subsetting the data into young mothers and mature mothers. Then got the max age of young mothers and the min age of mature mothers.
+
+## Activity 5
+#### Pick a pair of numerical and categorical variables and come up with a research question evaluating the relationship between these variables. Formulate the question in a way that it can be answered using a hypothesis test and/or a confidence interval. Answer your question using the inference function, report the statistical results, and also provide an explanation in plain language.
+
+### H0 µ male baby weight = µ female baby weight     
+### HA µ male baby weight != µ female baby weight 
+
+```{r act5-1}
+boxplot(nc$weight ~ nc$gender)
+
+inference(y = nc$weight, x = nc$gender, est = "mean", type = "ci", null = 0, 
+          alternative = "twosided", method = "theoretical", order = c('male', 'female'))
+
+inference(y = nc$weight, x = nc$gender, est = "mean", type = "ht", null = 0, 
+          alternative = "twosided", method = "theoretical", order = c('male', 'female'))
+```
+
+Although R gives the p value of 0, if we look at the z table for a two sided test we can see the P value is actually 0.000025. We can reject the null hypothesis and conclude that male weight is not equal to female weight.
+
+### H0 µ male baby weight = µ female baby weight     
+### HA µ male baby weight > µ female baby weight 
+
+```{r act5-2}
+inference(y = nc$weight, x = nc$gender, est = "mean", type = "ht", null = 0, 
+          alternative = "greater", method = "theoretical", order = c('male', 'female'))
+```
+
+If we look a little further we can conclude male weights are greater than femaile weights 
