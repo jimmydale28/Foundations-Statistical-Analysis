@@ -1,0 +1,140 @@
+---
+title: "Week4Lab"
+author: "JamesDale"
+date: "2/11/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+download.file("http://www.openintro.org/stat/data/ames.RData", destfile = "ames.RData")
+load("ames.RData")
+library(plotly)
+```
+
+```{r prep}
+population <- ames$Gr.Liv.Area
+samp <- sample(population, 60)
+```
+
+## The Data
+The Ames data set consists of __`r length(names(ames))` columns__ and __`r length(ames$Gr.Liv.Area)` rows__.
+
+## Exercise 1
+```{r ex1-1}
+gr_liv_area_mean <- mean(ames$Gr.Liv.Area)
+gr_liv_area_ds <- sd(ames$Gr.Liv.Area)
+hist(ames$Gr.Liv.Area, probability = TRUE)
+hist_x <- min(ames$Gr.Liv.Area) : max(ames$Gr.Liv.Area)
+hist_y <- dnorm(x = hist_x, mean = gr_liv_area_mean, sd = gr_liv_area_ds)
+lines(x=hist_x, y=hist_y, col = 'blue')
+```
+
+#### I would estimate typical size in this sample to be __`r median(ames$Gr.Liv.Area)`__. This estimate is based on the histogram shown above. We can see the distribution of area is right skewed, therefore I used the median value to best represent the middle of the data. I interprete typical to mean if I randomly asked someone how the area of their house it would be around this number. 
+
+## Exercise 2
+#### Given that it is a random sample size of 60 from a population I wouldn't expect the distribution to be identical however, I would expect it to be simular because it is a random sample of a fairly large size. 
+
+### Confidence intervals
+```{r confidence-intervals}
+sample_mean <- mean(samp)
+se <- sd(samp) / sqrt(60)
+lower <- sample_mean - 1.96 * se
+upper <- sample_mean + 1.96 * se
+c(lower, upper)
+```
+
+## Exercise 3
+#### __Conditions for Confidence intervals__
+* The sample observations are independent
+* The sample size is large
+* The poplation distribution is not strongly skewed
+
+## Exercise 4
+#### A confidence interval is a range defined around the point estimate. The stardard error determines how large this range is. 95% confidence interval means roughly 95% of values will contain the actual mean.
+
+```{r ex4-1}
+# True population mean
+mean(population)
+```
+
+## Exercise 5
+```{r ex5-1}
+if ((mean(population) >= lower) & (mean(population) <= upper)){
+  "My confidence interval contains the population mean."
+} else{
+  "My confidence interval does notcontain the population mean."
+}
+```
+#### If my neighbor has the same sample then we would most likely have the same confidence interval. If they have a different sample from the sample population the confidence inverals will vary slightly. 
+
+## Excercise 6
+```{r ex6-1}
+samp_mean <- rep(NA, 50)
+samp_sd <- rep(NA, 50)
+n <- 60
+for(i in 1:50){
+  samp <- sample(population, n)
+  samp_mean[i] <- mean(samp)
+  samp_sd[i] <- sd(samp)
+}
+lower_vector <- samp_mean - 1.96 * samp_sd / sqrt(n) 
+upper_vector <- samp_mean + 1.96 * samp_sd / sqrt(n)
+
+c(lower_vector[1], upper_vector[1])
+```
+
+
+### Below shows the range of confidence intervals for all 50 samples
+```{r ex6-2}
+p = plot_ly(type = "scatter", mode = 'markers')
+for ( i in 1:50){p <- add_trace(p, x = c(lower_vector[i], upper_vector[i]), y = c(i, i), mode = 'lines', showlegend = FALSE, line=list(color = 'black'))}
+p <- add_trace(p, x = c(mean(population), mean(population)), y = c(0,51), mode = 'lines', showlegend = FALSE)
+p
+```
+
+### Below shows the number of sample confidence intervals that capture population mean
+```{r ex6-3}
+num_within <- 0
+for (i in 1:50){if((lower_vector[i] <= mean(population))&(upper_vector[i] >= mean(population))){num_within<- num_within + 1}}
+num_within
+```
+
+### There are __`r num_within`__ confidence intervals that capture the population mean out of 50.
+
+## Activity 1
+
+```{r act1-1}
+# I wish i checked out out this function before fighting with the Plotly library
+plot_ci(lower_vector, upper_vector, mean(population))
+```
+
+### The proportion of confidence intervals that capture the population mean is __`r num_within/50`__.
+
+## Activity 2 
+### Choose 90% confidence interval. The appropraite critical value is 1.64. 
+
+
+## Activity 3
+```{r act3-1}
+act_samp_mean <- rep(NA, 50)
+act_samp_sd <- rep(NA, 50)
+act_n <- 60
+for(i in 1:50){
+  act_samp <- sample(population, act_n)
+  act_samp_mean[i] <- mean(act_samp)
+  act_samp_sd[i] <- sd(act_samp)
+}
+act_lower_vector <- act_samp_mean - 1.64 * act_samp_sd / sqrt(act_n) 
+act_upper_vector <- act_samp_mean + 1.64 * act_samp_sd / sqrt(act_n)
+
+plot_ci(act_lower_vector, act_upper_vector, mean(population))
+
+act_num_within <- 0
+for (i in 1:50){if((act_lower_vector[i] <= mean(population))&(act_upper_vector[i] >= mean(population))){act_num_within<- act_num_within + 1}}
+```
+
+### The proportion of confidence intervals that capture the population mean is __`r act_num_within/50`__ at a 90% confidence level. This is __`r if (num_within > act_num_within) { "lower"} else { "higher"}`__ than that of a 95% confidence level. 
+
